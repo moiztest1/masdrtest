@@ -1,0 +1,15 @@
+{
+  "status": 422,
+  "body": {
+    "message": "Validation Failed",
+    "errors": [
+      {
+        "resource": "Label",
+        "code": "missing_field",
+        "field": "name"
+      }
+    ],
+    "documentation_url": "https://docs.github.com/rest/issues/labels#create-a-label",
+    "status": "422"
+  }
+}
