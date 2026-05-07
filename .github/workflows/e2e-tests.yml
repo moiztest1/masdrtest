@@ -1,0 +1,131 @@
+name: E2E Tests
+
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+
+# `pages: write` + `id-token: write` are needed by peaceiris/actions-gh-pages
+# when it pushes to the gh-pages branch using the workflow's GITHUB_TOKEN.
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+# Only one in-flight deploy per branch. Newer pushes cancel older ones so
+# the gh-pages branch always reflects the most recent run.
+concurrency:
+  group: e2e-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    name: Playwright + Allure
+    runs-on: ubuntu-latest
+    # Skip on fork PRs: secrets are unavailable to forked workflows, so the
+    # tests would all fail with auth errors. Forks should run locally.
+    if: >-
+      github.event_name == 'push' ||
+      github.event.pull_request.head.repo.full_name == github.repository
+
+    env:
+      GH_TOKEN: ${{ secrets.GH_PAT }}
+      GH_OWNER: ${{ secrets.GH_OWNER }}
+      CI: 'true'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Setup Java 17 (Allure CLI)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Allure CLI
+        run: npm install -g allure-commandline@2.30.0
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run Playwright tests
+        id: tests
+        continue-on-error: true
+        run: npx playwright test
+
+      # Pull existing Allure history from gh-pages so the trend graph keeps
+      # accumulating runs. Without this, every report starts from zero. We use
+      # actions/checkout in a side path so a missing gh-pages branch on first
+      # run is non-fatal (continue-on-error).
+      - name: Fetch previous Allure history
+        if: always()
+        continue-on-error: true
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: gh-pages
+
+      - name: Restore Allure history into results
+        if: always()
+        run: |
+          mkdir -p allure-results/history
+          if [ -d "gh-pages/history" ]; then
+            cp -r gh-pages/history/* allure-results/history/ || true
+          fi
+
+      - name: Generate Allure report
+        if: always()
+        run: allure generate allure-results -o allure-report --clean
+
+      - name: Upload Allure report artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-report
+          path: allure-report
+          retention-days: 30
+
+      - name: Upload Playwright traces (debug)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-traces
+          path: |
+            test-results/
+            playwright-report/
+          retention-days: 14
+          if-no-files-found: ignore
+
+      - name: Deploy report to GitHub Pages
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./allure-report
+          publish_branch: gh-pages
+          # The report folder already contains the carried-over history,
+          # so we don't need actions-gh-pages to merge anything in.
+          keep_files: false
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
+          commit_message: 'docs(allure): publish report for ${{ github.sha }}'
+
+      # Make CI status reflect the test outcome. Without this, the
+      # `continue-on-error: true` above would mask failures and the workflow
+      # would always go green.
+      - name: Fail the job if any tests failed
+        if: steps.tests.outcome != 'success'
+        run: |
+          echo "::error::Playwright tests failed. See the Allure report artifact for details."
+          exit 1

@@ -1,0 +1,29 @@
+{
+  "name": "github-api-gui-e2e",
+  "version": "1.0.0",
+  "private": true,
+  "description": "End-to-end test suite covering the GitHub REST API and the GitHub web UI with Playwright + Allure.",
+  "scripts": {
+    "test": "playwright test",
+    "test:api": "playwright test --project=api",
+    "test:gui": "playwright test --project=gui",
+    "test:headed": "playwright test --project=gui --headed",
+    "report:generate": "allure generate allure-results -o allure-report --clean",
+    "report:open": "allure open allure-report",
+    "report:serve": "allure serve allure-results",
+    "lint": "eslint .",
+    "clean": "rimraf allure-results allure-report playwright-report test-results"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.48.0",
+    "allure-commandline": "^2.30.0",
+    "allure-playwright": "^3.0.5",
+    "dotenv": "^16.4.5",
+    "eslint": "^9.13.0",
+    "eslint-plugin-playwright": "^2.0.1",
+    "rimraf": "^6.0.1"
+  }
+}
