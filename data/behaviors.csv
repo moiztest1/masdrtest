@@ -1,0 +1,8 @@
+"BROKEN","EPIC","FAILED","FEATURE","PASSED","SKIPPED","STORY","UNKNOWN"
+"0","GitHub Integration","1","API Edge Cases","0","0","Idempotent delete","0"
+"0","GitHub Integration","1","API Edge Cases","0","0","Non-existent repository","0"
+"0","GitHub Integration","0","API Edge Cases","1","0","No credentials","0"
+"0","GitHub Integration","2","UI parity with API state","0","0","","0"
+"0","GitHub Integration","1","Repository Lifecycle","0","0","Create repo, file an issue with a label, then clean up","0"
+"0","","0","","0","1","","0"
+"0","GitHub Integration","2","API Edge Cases","0","0","","0"
