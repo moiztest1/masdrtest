@@ -3,7 +3,7 @@ const { allure } = require('allure-playwright');
 const apiClient = require('../../utils/api-client');
 const { uniqueIssue, uniqueLabel } = require('../../fixtures/test-data');
 
-test.describe('GitHub REST API: repo → issue → label → cleanup', () => {
+test.describe('GitHub REST API: repo to issue to label and then to cleanup', () => {
   test.beforeEach(async () => {
     allure.epic('GitHub Integration');
     allure.feature('Repository Lifecycle');

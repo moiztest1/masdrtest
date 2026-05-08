@@ -119,7 +119,7 @@ jobs:
           keep_files: false
           user_name: 'github-actions[bot]'
           user_email: 'github-actions[bot]@users.noreply.github.com'
-          commit_message: 'docs(allure): publish report for ${{ github.sha }}'
+          commit_message: 'Publish Allure report'
 
       # Make CI status reflect the test outcome. Without this, the
       # `continue-on-error: true` above would mask failures and the workflow
