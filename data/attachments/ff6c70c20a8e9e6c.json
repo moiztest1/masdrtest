@@ -1,0 +1,12 @@
+{
+  "status": 201,
+  "body": {
+    "id": 10907930110,
+    "node_id": "LA_kwDOSY4R088AAAACiinN_g",
+    "url": "https://api.github.com/repos/moiztest1/e2e-test-1778347335066-7cbd819a5f43/labels/e2e-label-flow-60e3fe",
+    "name": "e2e-label-flow-60e3fe",
+    "color": "ededed",
+    "default": false,
+    "description": "Label applied by the masdrtest E2E suite."
+  }
+}
